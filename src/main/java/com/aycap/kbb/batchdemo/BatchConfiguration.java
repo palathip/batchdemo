@@ -16,16 +16,22 @@ import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.support.ListItemReader;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.validation.annotation.Validated;
 
 import javax.sql.DataSource;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
+import java.util.Set;
 
 @Slf4j
 @Configuration
+@Validated
 @EnableBatchProcessing
 public class BatchConfiguration {
 
@@ -59,17 +65,36 @@ public class BatchConfiguration {
     @StepScope
     @Bean
     public ListItemReader<Person> itemReader(
-            MyListReader myListReader,
+            BodyReader myListReader,
             @Value("#{jobParameters['batch-key']}") Long batchKey
     ) {
         return myListReader.getPersons(batchKey);
     }
+
+    @Autowired
+    Validator validator;
 
     @Bean
     ItemProcessor<Person, Person> processor() {
         return person -> {
             final String firstName = person.getFirstName().toUpperCase();
             final String lastName = person.getLastName().toUpperCase();
+            log.info(firstName +" "+ lastName);
+
+//  region custom validator
+//  ref : https://www.baeldung.com/javax-validation#2-validate-the-bean
+//  ref : https://reflectoring.io/bean-validation-with-spring-boot/#validating-programmatically
+
+            Person user = new Person();
+            user.setFirstName(firstName);
+            user.setLastName(lastName);
+
+            Set<ConstraintViolation<Person>> violations = validator.validate(user);
+            for (ConstraintViolation<Person> violation : violations) {
+                log.info("error : "+violation.getMessage());
+            }
+
+//  endregion
             return new Person(firstName, lastName);
         };
     }

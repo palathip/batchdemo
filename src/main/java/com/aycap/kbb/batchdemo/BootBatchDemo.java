@@ -10,13 +10,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.Banner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.List;
 
 @Slf4j
 @SpringBootApplication
 @RestController
+@RequestMapping("/invoke-job/")
 public class BootBatchDemo {
 
     public static void main(String[] args) {
@@ -34,10 +36,25 @@ public class BootBatchDemo {
     @Autowired
     MyListReader myListReader;
 
-    @RequestMapping("/invoke-job/{size}")
+    @Autowired
+    BodyReader bodyReader;
+
+    @GetMapping("get/{size}")
     public String handle(@PathVariable Integer size) throws Exception {
         Long bKey = System.currentTimeMillis();
         myListReader.setPersons(bKey, size);
+        JobParameters jobParameters = new JobParametersBuilder()
+                .addLong("time", System.currentTimeMillis())
+                .addLong("batch-key", bKey)
+                .toJobParameters();
+        JobExecution x = jobLauncher.run(job, jobParameters);
+        return "Batch job has been invoked :" + x.getJobConfigurationName();
+    }
+
+    @PostMapping("/post")
+    public String handle(@RequestBody List<HashMap<String,Object>> application) throws Exception {
+        Long bKey = System.currentTimeMillis();
+        bodyReader.setPersons(bKey,application);
         JobParameters jobParameters = new JobParametersBuilder()
                 .addLong("time", System.currentTimeMillis())
                 .addLong("batch-key", bKey)
