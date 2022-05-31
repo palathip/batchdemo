@@ -17,17 +17,26 @@ import java.util.Map;
 @Slf4j
 public class BodyReader {
     private final Map<Long, List<Person>> map = new HashMap<>();
+    private final Map<Long, List<String>> mapResult = new HashMap<>();
 
     public void setPersons(Long key,List<HashMap<String,Object>> application) {
         log.info("Form bodyReader : "+application.size());
         ArrayList<Person> arr = new ArrayList<>();
         application.forEach(row ->{
-            arr.add(new Person(row.get("first_name").toString(),row.get("last_name").toString()));
+            arr.add(new Person(row.get("application_no").toString(),row.get("first_name").toString(),row.get("last_name").toString()));
         });
         map.put(key,arr);
     }
 
     public ListItemReader<Person> getPersons(Long batchKey) {
         return new ListItemReader<>(map.get(batchKey));
+    }
+
+    public void setResult(Long key,List<String> errors){
+        mapResult.put(key,errors);
+    }
+    public List<String> getResult(Long key){
+        map.remove(key);
+        return mapResult.remove(key);
     }
 }

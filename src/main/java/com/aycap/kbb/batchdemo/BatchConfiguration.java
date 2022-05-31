@@ -27,13 +27,16 @@ import org.springframework.validation.annotation.Validated;
 import javax.sql.DataSource;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @Configuration
 @Validated
 @EnableBatchProcessing
 public class BatchConfiguration {
+
+    @Autowired
+    BodyReader bodyReader;
 
     @Bean
     public Job importUserJob(
@@ -57,7 +60,7 @@ public class BatchConfiguration {
         return stepBuilderFactory.get("step1")
                 .<Person, Person>chunk(1000)
                 .reader(itemReader)
-                .processor(processor())
+                .processor(processor(bodyReader))
                 .writer(writer)
                 .build();
     }
@@ -65,37 +68,45 @@ public class BatchConfiguration {
     @StepScope
     @Bean
     public ListItemReader<Person> itemReader(
-            BodyReader myListReader,
+            BodyReader bodyReader,
             @Value("#{jobParameters['batch-key']}") Long batchKey
     ) {
-        return myListReader.getPersons(batchKey);
+        return bodyReader.getPersons(batchKey);
     }
 
     @Autowired
     Validator validator;
 
     @Bean
-    ItemProcessor<Person, Person> processor() {
+    ItemProcessor<Person, Person> processor(BodyReader bodyReader) {
         return person -> {
+            log.info(String.valueOf(person));
+            final String applicationNo = person.getApplicationNo().toUpperCase();
             final String firstName = person.getFirstName().toUpperCase();
             final String lastName = person.getLastName().toUpperCase();
-            log.info(firstName +" "+ lastName);
 
 //  region custom validator
 //  ref : https://www.baeldung.com/javax-validation#2-validate-the-bean
 //  ref : https://reflectoring.io/bean-validation-with-spring-boot/#validating-programmatically
 
             Person user = new Person();
+            user.setApplicationNo(applicationNo);
             user.setFirstName(firstName);
             user.setLastName(lastName);
+            Long bKey = System.currentTimeMillis();
 
             Set<ConstraintViolation<Person>> violations = validator.validate(user);
+            ArrayList<String> resultList = new ArrayList<>();
             for (ConstraintViolation<Person> violation : violations) {
-                log.info("error : "+violation.getMessage());
+                resultList.add("appNo:"+applicationNo+violation.getMessage());
             }
 
+            bodyReader.setResult(bKey,resultList);
+            List<String> result = bodyReader.getResult(bKey);
+            log.info(String.valueOf(result));
+
 //  endregion
-            return new Person(firstName, lastName);
+            return new Person(applicationNo,firstName, lastName);
         };
     }
 
@@ -121,10 +132,11 @@ public class BatchConfiguration {
             public void afterJob(JobExecution jobExecution) {
                 if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
                     log.info("!!! JOB FINISHED! Time to verify the results");
-                    int size = jdbcTemplate.query("SELECT first_name, last_name FROM people",
+                    int size = jdbcTemplate.query("SELECT application_no,first_name, last_name FROM people",
                             (rs, row) -> new Person(
                                     rs.getString(1),
-                                    rs.getString(2))
+                                    rs.getString(2),
+                                    rs.getString(3))
                     ).size();
                     log.info("Found " + size + " items in the database.");
 

@@ -9,6 +9,8 @@ import javax.validation.constraints.NotNull;
 @Setter
 public class Person {
 
+    private String applicationNo;
+
     @NotNull(message = "[last_name] must not be null")
     @NotEmpty(message = "[last_name] must not be empty")
     private String lastName;
@@ -17,17 +19,19 @@ public class Person {
     @NotEmpty(message = "[first_name] must not be empty")
     private String firstName;
 
-    public Person() {
+    public Person(){
+
     }
 
-    public Person(String firstName, String lastName) {
+    public Person(String applicationNo,String firstName, String lastName) {
+        this.applicationNo = applicationNo;
         this.firstName = firstName;
         this.lastName = lastName;
     }
 
     @Override
     public String toString() {
-        return "firstName: " + firstName + ", lastName: " + lastName;
+        return "applicationNo: " + applicationNo + ", firstName: " + firstName + ", lastName: " + lastName;
     }
 
 }

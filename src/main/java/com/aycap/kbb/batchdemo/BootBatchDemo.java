@@ -12,6 +12,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -59,7 +60,11 @@ public class BootBatchDemo {
                 .addLong("time", System.currentTimeMillis())
                 .addLong("batch-key", bKey)
                 .toJobParameters();
-        JobExecution x = jobLauncher.run(job, jobParameters);
-        return "Batch job has been invoked :" + x.getJobConfigurationName();
+        jobLauncher.run(job, jobParameters);
+
+        List<String> result = bodyReader.getResult(bKey);
+        log.info(String.valueOf(result));
+
+        return "error : " + result;
     }
 }
