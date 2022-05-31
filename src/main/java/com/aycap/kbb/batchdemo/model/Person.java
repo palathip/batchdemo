@@ -11,11 +11,9 @@ public class Person {
 
     private String applicationNo;
 
-    @NotNull(message = "[last_name] must not be null")
     @NotEmpty(message = "[last_name] must not be empty")
     private String lastName;
 
-    @NotNull(message = "[first_name] must not be null")
     @NotEmpty(message = "[first_name] must not be empty")
     private String firstName;
 

@@ -56,11 +56,12 @@ public class BatchConfiguration {
     public Step step1(
             StepBuilderFactory stepBuilderFactory,
             JdbcBatchItemWriter<Person> writer,
-            ListItemReader<Person> itemReader) {
+            ListItemReader<Person> itemReader,
+            ItemProcessor<Person, Person> processor) {
         return stepBuilderFactory.get("step1")
                 .<Person, Person>chunk(1000)
                 .reader(itemReader)
-                .processor(processor(bodyReader))
+                .processor(processor)
                 .writer(writer)
                 .build();
     }
@@ -78,7 +79,9 @@ public class BatchConfiguration {
     Validator validator;
 
     @Bean
-    ItemProcessor<Person, Person> processor(BodyReader bodyReader) {
+    @StepScope
+    ItemProcessor<Person, Person> processor(BodyReader bodyReader,
+                                            @Value("#{jobParameters['batch-key']}") Long bKey) {
         return person -> {
             log.info(String.valueOf(person));
             final String applicationNo = person.getApplicationNo().toUpperCase();
@@ -93,17 +96,14 @@ public class BatchConfiguration {
             user.setApplicationNo(applicationNo);
             user.setFirstName(firstName);
             user.setLastName(lastName);
-            Long bKey = System.currentTimeMillis();
 
             Set<ConstraintViolation<Person>> violations = validator.validate(user);
             ArrayList<String> resultList = new ArrayList<>();
             for (ConstraintViolation<Person> violation : violations) {
                 resultList.add("appNo:"+applicationNo+violation.getMessage());
             }
-
             bodyReader.setResult(bKey,resultList);
-            List<String> result = bodyReader.getResult(bKey);
-            log.info(String.valueOf(result));
+
 
 //  endregion
             return new Person(applicationNo,firstName, lastName);

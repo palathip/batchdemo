@@ -61,10 +61,7 @@ public class BootBatchDemo {
                 .addLong("batch-key", bKey)
                 .toJobParameters();
         jobLauncher.run(job, jobParameters);
-
         List<String> result = bodyReader.getResult(bKey);
-        log.info(String.valueOf(result));
-
         return "error : " + result;
     }
 }
