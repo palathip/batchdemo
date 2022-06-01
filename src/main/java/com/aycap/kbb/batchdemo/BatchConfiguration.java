@@ -98,15 +98,12 @@ public class BatchConfiguration {
             user.setLastName(lastName);
 
             Set<ConstraintViolation<Person>> violations = validator.validate(user);
-            ArrayList<Object> resultList = new ArrayList<>();
             HashMap<String,String> resultObject = new HashMap<>();
             for (ConstraintViolation<Person> violation : violations) {
                 resultObject.put("application_no",applicationNo);
                 resultObject.put("reason",violation.getMessage());
-                resultList.add(resultObject);
+                bodyReader.addResult(resultObject);
             }
-            bodyReader.setResult(bKey,resultList);
-
 
 //  endregion
             return new Person(applicationNo,firstName, lastName);
@@ -128,9 +125,6 @@ public class BatchConfiguration {
 
             @Override
             public void beforeJob(JobExecution jobExecution) {
-                Long key = Long.parseLong(jobExecution.getJobParameters().getString("batch-key"));
-//                log.info(itemReader(key).toString());
-
 
                 log.info("Job : " + jobExecution.getJobConfigurationName() + " started!");
             }

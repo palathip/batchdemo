@@ -61,11 +61,11 @@ public class BootBatchDemo {
                 .addLong("batch-key", bKey)
                 .toJobParameters();
         jobLauncher.run(job, jobParameters);
-        List<Object> result = bodyReader.getResult(bKey);
         HashMap<String,Object> response = new HashMap<>();
-        response.put("success_count",application.size()-result.size());
-        response.put("error_count",result.size());
-        response.put("errors",result);
+        bodyReader.setResult(bKey);
+        response.put("success_count",application.size()-bodyReader.getFinalResult().size());
+        response.put("error_count",bodyReader.getFinalResult().size());
+        response.put("errors",bodyReader.getFinalResult());
 
         return response;
     }

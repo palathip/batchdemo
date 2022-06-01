@@ -18,6 +18,7 @@ import java.util.Map;
 public class BodyReader {
     private final Map<Long, List<Person>> map = new HashMap<>();
     private final Map<Long, List<Object>> mapResult = new HashMap<>();
+    private final ArrayList<Object> objectResult = new ArrayList<>();
 
     public void setPersons(Long key,List<HashMap<String,Object>> application) {
         log.info("Form bodyReader : "+application.size());
@@ -32,11 +33,18 @@ public class BodyReader {
         return new ListItemReader<>(map.get(batchKey));
     }
 
-    public void setResult(Long key,List<Object> errors){
-        mapResult.put(key,errors);
+    public void setResult(Long key){
+        mapResult.put(key,objectResult);
     }
+
     public List<Object> getResult(Long key){
         map.remove(key);
         return mapResult.remove(key);
+    }
+    public void addResult(Object result){
+        objectResult.add(result);
+    }
+    public List<Object> getFinalResult(){
+        return objectResult;
     }
 }
