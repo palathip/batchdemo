@@ -83,7 +83,7 @@ public class BatchConfiguration {
     ItemProcessor<Person, Person> processor(BodyReader bodyReader,
                                             @Value("#{jobParameters['batch-key']}") Long bKey) {
         return person -> {
-            log.info(String.valueOf(person));
+//            log.info(String.valueOf(person));
             final String applicationNo = person.getApplicationNo().toUpperCase();
             final String firstName = person.getFirstName().toUpperCase();
             final String lastName = person.getLastName().toUpperCase();
@@ -98,9 +98,12 @@ public class BatchConfiguration {
             user.setLastName(lastName);
 
             Set<ConstraintViolation<Person>> violations = validator.validate(user);
-            ArrayList<String> resultList = new ArrayList<>();
+            ArrayList<Object> resultList = new ArrayList<>();
+            HashMap<String,String> resultObject = new HashMap<>();
             for (ConstraintViolation<Person> violation : violations) {
-                resultList.add("appNo:"+applicationNo+violation.getMessage());
+                resultObject.put("application_no",applicationNo);
+                resultObject.put("reason",violation.getMessage());
+                resultList.add(resultObject);
             }
             bodyReader.setResult(bKey,resultList);
 
@@ -125,6 +128,10 @@ public class BatchConfiguration {
 
             @Override
             public void beforeJob(JobExecution jobExecution) {
+                Long key = Long.parseLong(jobExecution.getJobParameters().getString("batch-key"));
+//                log.info(itemReader(key).toString());
+
+
                 log.info("Job : " + jobExecution.getJobConfigurationName() + " started!");
             }
 

@@ -17,7 +17,7 @@ import java.util.Map;
 @Slf4j
 public class BodyReader {
     private final Map<Long, List<Person>> map = new HashMap<>();
-    private final Map<Long, List<String>> mapResult = new HashMap<>();
+    private final Map<Long, List<Object>> mapResult = new HashMap<>();
 
     public void setPersons(Long key,List<HashMap<String,Object>> application) {
         log.info("Form bodyReader : "+application.size());
@@ -32,10 +32,10 @@ public class BodyReader {
         return new ListItemReader<>(map.get(batchKey));
     }
 
-    public void setResult(Long key,List<String> errors){
+    public void setResult(Long key,List<Object> errors){
         mapResult.put(key,errors);
     }
-    public List<String> getResult(Long key){
+    public List<Object> getResult(Long key){
         map.remove(key);
         return mapResult.remove(key);
     }

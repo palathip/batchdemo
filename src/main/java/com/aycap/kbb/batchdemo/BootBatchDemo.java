@@ -53,7 +53,7 @@ public class BootBatchDemo {
     }
 
     @PostMapping("/post")
-    public String handle(@RequestBody List<HashMap<String,Object>> application) throws Exception {
+    public Object handle(@RequestBody List<HashMap<String,Object>> application) throws Exception {
         Long bKey = System.currentTimeMillis();
         bodyReader.setPersons(bKey,application);
         JobParameters jobParameters = new JobParametersBuilder()
@@ -61,7 +61,12 @@ public class BootBatchDemo {
                 .addLong("batch-key", bKey)
                 .toJobParameters();
         jobLauncher.run(job, jobParameters);
-        List<String> result = bodyReader.getResult(bKey);
-        return "error : " + result;
+        List<Object> result = bodyReader.getResult(bKey);
+        HashMap<String,Object> response = new HashMap<>();
+        response.put("success_count",application.size()-result.size());
+        response.put("error_count",result.size());
+        response.put("errors",result);
+
+        return response;
     }
 }
