@@ -55,6 +55,7 @@ public class BootBatchDemo {
     @PostMapping("/post")
     public Object handle(@RequestBody List<HashMap<String,Object>> application) throws Exception {
         Long bKey = System.currentTimeMillis();
+        bodyReader.clearResult();
         bodyReader.setPersons(bKey,application);
         JobParameters jobParameters = new JobParametersBuilder()
                 .addLong("time", System.currentTimeMillis())

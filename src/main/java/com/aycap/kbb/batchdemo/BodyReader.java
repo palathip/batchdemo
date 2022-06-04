@@ -44,7 +44,12 @@ public class BodyReader {
     public void addResult(Object result){
         objectResult.add(result);
     }
+
     public List<Object> getFinalResult(){
         return objectResult;
+    }
+
+    public void clearResult(){
+        objectResult.clear();
     }
 }
