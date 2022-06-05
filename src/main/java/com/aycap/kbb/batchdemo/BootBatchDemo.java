@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @SpringBootApplication
@@ -55,18 +56,18 @@ public class BootBatchDemo {
     @PostMapping("/post")
     public Object handle(@RequestBody List<HashMap<String,Object>> application) throws Exception {
         Long bKey = System.currentTimeMillis();
-        bodyReader.clearResult();
         bodyReader.setPersons(bKey,application);
         JobParameters jobParameters = new JobParametersBuilder()
                 .addLong("time", System.currentTimeMillis())
                 .addLong("batch-key", bKey)
                 .toJobParameters();
         jobLauncher.run(job, jobParameters);
-        HashMap<String,Object> response = new HashMap<>();
-        bodyReader.setResult(bKey);
-        response.put("success_count",application.size()-bodyReader.getFinalResult().size());
-        response.put("error_count",bodyReader.getFinalResult().size());
-        response.put("errors",bodyReader.getFinalResult());
+        Map<String,Object> response = new HashMap<>();
+        List<Object> resultErrors = bodyReader.getResult(bKey);
+
+        response.put("success_count",application.size()-resultErrors.size());
+        response.put("error_count",resultErrors.size());
+        response.put("errors",resultErrors);
 
         return response;
     }

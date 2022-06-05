@@ -35,6 +35,8 @@ import java.util.*;
 @EnableBatchProcessing
 public class BatchConfiguration {
 
+    private final ArrayList<Object> objectResult = new ArrayList<>();
+
     @Autowired
     BodyReader bodyReader;
 
@@ -89,20 +91,22 @@ public class BatchConfiguration {
             final String lastName = person.getLastName().toUpperCase();
 
 //  region custom validator
-//  ref : https://www.baeldung.com/javax-validation#2-validate-the-bean
-//  ref : https://reflectoring.io/bean-validation-with-spring-boot/#validating-programmatically
+//  ref1 : https://www.baeldung.com/javax-validation#2-validate-the-bean
+//  ref2: https://reflectoring.io/bean-validation-with-spring-boot/#validating-programmatically
 
             Person user = new Person();
             user.setApplicationNo(applicationNo);
             user.setFirstName(firstName);
             user.setLastName(lastName);
-
             Set<ConstraintViolation<Person>> violations = validator.validate(user);
-            HashMap<String,String> resultObject = new HashMap<>();
-            for (ConstraintViolation<Person> violation : violations) {
-                resultObject.put("application_no",applicationNo);
-                resultObject.put("reason",violation.getMessage());
-                bodyReader.addResult(resultObject);
+            if(!violations.isEmpty()) {
+                HashMap<String, String> resultObject = new HashMap<>();
+                for (ConstraintViolation<Person> violation : violations) {
+                    resultObject.put("application_no", applicationNo);
+                    resultObject.put("reason", violation.getMessage());
+                    objectResult.add(resultObject);
+                }
+                return null;
             }
 
 //  endregion
@@ -114,7 +118,7 @@ public class BatchConfiguration {
     public JdbcBatchItemWriter<Person> writer(DataSource dataSource) {
         return new JdbcBatchItemWriterBuilder<Person>()
                 .itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>())
-                .sql("INSERT INTO people (first_name, last_name) VALUES (:firstName, :lastName)")
+                .sql("INSERT INTO people (application_no,first_name, last_name) VALUES (:applicationNo, :firstName, :lastName)")
                 .dataSource(dataSource)
                 .build();
     }
@@ -125,7 +129,10 @@ public class BatchConfiguration {
 
             @Override
             public void beforeJob(JobExecution jobExecution) {
-
+                JobParameters key = jobExecution.getJobParameters();
+                key.getLong("batch-key");
+                bodyReader.setResult(key.getLong("batch-key"),objectResult);
+                objectResult.clear();
                 log.info("Job : " + jobExecution.getJobConfigurationName() + " started!");
             }
 
