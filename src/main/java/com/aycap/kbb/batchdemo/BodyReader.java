@@ -23,7 +23,10 @@ public class BodyReader {
         log.info("Form bodyReader : "+application.size());
         ArrayList<Person> arr = new ArrayList<>();
         application.forEach(row ->{
-            arr.add(new Person(row.get("application_no").toString(),row.get("first_name").toString(),row.get("last_name").toString()));
+            arr.add(new Person(
+                    row.get("application_no").toString(),
+                    row.get("first_name").toString(),
+                    row.get("last_name").toString()));
         });
         map.put(key,arr);
     }
