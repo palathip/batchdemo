@@ -85,7 +85,6 @@ public class BatchConfiguration {
     ItemProcessor<Person, Person> processor(BodyReader bodyReader,
                                             @Value("#{jobParameters['batch-key']}") Long bKey) {
         return person -> {
-//            log.info(String.valueOf(person));
             final String applicationNo = person.getApplicationNo().toUpperCase();
             final String firstName = person.getFirstName().toUpperCase();
             final String lastName = person.getLastName().toUpperCase();
