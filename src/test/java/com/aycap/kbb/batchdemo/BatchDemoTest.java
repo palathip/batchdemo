@@ -1,7 +1,7 @@
 package com.aycap.kbb.batchdemo;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,6 +13,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(SpringExtension.class)
@@ -30,12 +34,25 @@ class BatchDemoTest {
     }
 
     @Test
-    void testPostApplication(){
+    void testPostApplicationHttpStatus(){
         HttpHeaders headers = new HttpHeaders();
-        log.info("test");
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<Object> entity = new HttpEntity<>(new ClassPathResource("mock.json"),headers);
         assertEquals(HttpStatus.OK,this.testTemplate.postForEntity(url(),entity,String.class).getStatusCode());
+    }
+
+    @Test
+    void testPostApplicationResponse(){
+        HashMap<String,Object> expected = new HashMap<>();
+        ArrayList<Object> mockList = new ArrayList<>();
+        expected.put("success_count",2);
+        expected.put("error_count",0);
+        expected.put("errors",mockList);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Object> entity = new HttpEntity<>(new ClassPathResource("mock.json"),headers);
+        assertEquals(expected.,this.testTemplate.postForEntity(url(),entity,String.class).getBody());
     }
 
 
