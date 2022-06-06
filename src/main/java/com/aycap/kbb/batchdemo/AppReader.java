@@ -2,7 +2,6 @@ package com.aycap.kbb.batchdemo;
 
 
 import com.aycap.kbb.batchdemo.model.ApplicationModel;
-import com.aycap.kbb.batchdemo.model.Person;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.item.support.ListItemReader;
 import org.springframework.context.annotation.Scope;
@@ -15,7 +14,7 @@ import java.util.*;
 @Slf4j
 public class AppReader {
     private final Map<Long, List<ApplicationModel>> applicaitionMap = new HashMap<>();
-    private final Map<Long, List<Person>> map = new HashMap<>();
+    private final Map<Long, List<ApplicationModel>> map = new HashMap<>();
     private final Map<Long, List<Object>> mapResult = new HashMap<>();
 
     public void setApplicationMap(Long key,List<ApplicationModel> application) {

@@ -2,7 +2,6 @@ package com.aycap.kbb.batchdemo;
 
 import com.aycap.kbb.batchdemo.model.Application;
 import com.aycap.kbb.batchdemo.model.ApplicationModel;
-import com.aycap.kbb.batchdemo.model.Person;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.*;
@@ -150,11 +149,11 @@ public class BatchConfiguration {
     /**
      * Depreciated
      */
-    public FlatFileItemReader<Person> reader() {
-        BeanWrapperFieldSetMapper<Person> mapper = new BeanWrapperFieldSetMapper<>();
-        mapper.setTargetType(Person.class);
+    public FlatFileItemReader<Application> reader() {
+        BeanWrapperFieldSetMapper<Application> mapper = new BeanWrapperFieldSetMapper<>();
+        mapper.setTargetType(Application.class);
         String resourcePath = "sample-data.csv";//"sample-data.large.csv"
-        return new FlatFileItemReaderBuilder<Person>()
+        return new FlatFileItemReaderBuilder<Application>()
                 .name("personItemReader")
                 .resource(new ClassPathResource(resourcePath))
                 .delimited()
