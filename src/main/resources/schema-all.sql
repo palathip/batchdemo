@@ -10,10 +10,12 @@ CREATE TABLE people  (
 );
 
 CREATE TABLE application  (
-  person_id BIGINT IDENTITY NOT NULL PRIMARY KEY,
+  application_id BIGINT IDENTITY NOT NULL PRIMARY KEY,
   application_no VARCHAR(20),
   product_code VARCHAR(5),
   sum_insured DOUBLE,
+  net_premium DOUBLE,
+  gross_premium DOUBLE,
   effective_date DATETIME,
   expired_date DATETIME,
   payer_title_name VARCHAR(40),

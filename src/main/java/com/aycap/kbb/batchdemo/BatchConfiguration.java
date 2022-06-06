@@ -113,7 +113,37 @@ public class BatchConfiguration {
     public JdbcBatchItemWriter<Application> writer(DataSource dataSource) {
         return new JdbcBatchItemWriterBuilder<Application>()
                 .itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>())
-                .sql("INSERT INTO application (application_no) VALUES (:applicationNo)")
+                .sql("INSERT INTO application " +
+                        "(application_no," +
+                        "product_code," +
+                        "sum_insured," +
+                        "net_premium," +
+                        "gross_premium," +
+                        "effective_date," +
+                        "expired_date," +
+                        "payer_title_name," +
+                        "payer_title_name_en," +
+                        "payer_name," +
+                        "payer_name_en," +
+                        "payer_lastname," +
+                        "payer_lastname_en," +
+                        "payer_birth_date) " +
+                        "VALUES " +
+                        "(:applicationNo," +
+                        ":productCode," +
+                        ":sumInsured," +
+                        ":netPremium," +
+                        ":grossPremium," +
+                        ":effectiveDate," +
+                        ":expiredDate," +
+                        ":payerTitleName," +
+                        ":payerTitleNameEn," +
+                        ":payerName," +
+                        ":payerNameEn," +
+                        ":payerLastname," +
+                        ":payerLastnameEn," +
+                        ":payerBirthDate) " +
+                        "")
                 .dataSource(dataSource)
                 .build();
     }
