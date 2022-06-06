@@ -1,5 +1,6 @@
 package com.aycap.kbb.batchdemo;
 
+import com.aycap.kbb.batchdemo.model.ApplicationModel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
@@ -36,34 +37,19 @@ public class BootBatchDemo {
     Job job;
 
     @Autowired
-    MyListReader myListReader;
-
-    @Autowired
-    BodyReader bodyReader;
-
-    @GetMapping("get/{size}")
-    public String handle(@PathVariable Integer size) throws Exception {
-        Long bKey = System.currentTimeMillis();
-        myListReader.setPersons(bKey, size);
-        JobParameters jobParameters = new JobParametersBuilder()
-                .addLong("time", System.currentTimeMillis())
-                .addLong("batch-key", bKey)
-                .toJobParameters();
-        JobExecution x = jobLauncher.run(job, jobParameters);
-        return "Batch job has been invoked :" + x.getJobConfigurationName();
-    }
+    AppReader appReader;
 
     @PostMapping("/post")
-    public Object handle(@RequestBody List<HashMap<String,Object>> application) throws Exception {
+    public Object handle(@RequestBody List<ApplicationModel> application) throws Exception {
         Long bKey = System.currentTimeMillis();
-        bodyReader.setPersons(bKey,application);
+        appReader.setApplicationMap(bKey,application);
         JobParameters jobParameters = new JobParametersBuilder()
                 .addLong("time", System.currentTimeMillis())
                 .addLong("batch-key", bKey)
                 .toJobParameters();
         jobLauncher.run(job, jobParameters);
         Map<String,Object> response = new HashMap<>();
-        List<Object> resultErrors = bodyReader.getResult(bKey);
+        List<Object> resultErrors = appReader.getResult(bKey);
 
         response.put("success_count",application.size()-resultErrors.size());
         response.put("error_count",resultErrors.size());

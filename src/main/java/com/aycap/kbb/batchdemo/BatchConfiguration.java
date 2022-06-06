@@ -1,6 +1,9 @@
 package com.aycap.kbb.batchdemo;
 
+import com.aycap.kbb.batchdemo.model.Application;
+import com.aycap.kbb.batchdemo.model.ApplicationModel;
 import com.aycap.kbb.batchdemo.model.Person;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -38,7 +41,7 @@ public class BatchConfiguration {
     private final ArrayList<Object> objectResult = new ArrayList<>();
 
     @Autowired
-    BodyReader bodyReader;
+    AppReader appReader;
 
     @Bean
     public Job importUserJob(
@@ -57,11 +60,11 @@ public class BatchConfiguration {
     @Bean("stepOne")
     public Step step1(
             StepBuilderFactory stepBuilderFactory,
-            JdbcBatchItemWriter<Person> writer,
-            ListItemReader<Person> itemReader,
-            ItemProcessor<Person, Person> processor) {
+            JdbcBatchItemWriter<Application> writer,
+            ListItemReader<ApplicationModel> itemReader,
+            ItemProcessor<ApplicationModel,Application> processor) {
         return stepBuilderFactory.get("step1")
-                .<Person, Person>chunk(1000)
+                .<ApplicationModel, Application>chunk(1000)
                 .reader(itemReader)
                 .processor(processor)
                 .writer(writer)
@@ -70,54 +73,48 @@ public class BatchConfiguration {
 
     @StepScope
     @Bean
-    public ListItemReader<Person> itemReader(
-            BodyReader bodyReader,
+    public ListItemReader<ApplicationModel> itemReader(
+            AppReader appReader,
             @Value("#{jobParameters['batch-key']}") Long batchKey
     ) {
-        return bodyReader.getPersons(batchKey);
+        return appReader.getApplicationMap(batchKey);
     }
 
     @Autowired
     Validator validator;
 
     @Bean
-    @StepScope
-    ItemProcessor<Person, Person> processor(BodyReader bodyReader,
-                                            @Value("#{jobParameters['batch-key']}") Long bKey) {
-        return person -> {
-            final String applicationNo = person.getApplicationNo().toUpperCase();
-            final String firstName = person.getFirstName().toUpperCase();
-            final String lastName = person.getLastName().toUpperCase();
+    ItemProcessor<ApplicationModel, Application> processor() {
+        return applicationModel -> {
+
+              final ObjectMapper mapper = new ObjectMapper();
+              Application application = mapper.convertValue(applicationModel,Application.class);
 
 //  region custom validator
 //  ref1 : https://www.baeldung.com/javax-validation#2-validate-the-bean
 //  ref2: https://reflectoring.io/bean-validation-with-spring-boot/#validating-programmatically
 
-            Person user = new Person();
-            user.setApplicationNo(applicationNo);
-            user.setFirstName(firstName);
-            user.setLastName(lastName);
-            Set<ConstraintViolation<Person>> violations = validator.validate(user);
+            Set<ConstraintViolation<Application>> violations = validator.validate(application);
             if(!violations.isEmpty()) {
                 HashMap<String, String> resultObject = new HashMap<>();
-                for (ConstraintViolation<Person> violation : violations) {
-                    resultObject.put("application_no", applicationNo);
-                    resultObject.put("reason", violation.getMessage());
+                for (ConstraintViolation<Application> violation : violations) {
+                    resultObject.put("application_no", application.getApplicationNo());
+                    resultObject.put("reason", violation.getMessageTemplate());
                     objectResult.add(resultObject);
                 }
                 return null;
             }
-
 //  endregion
-            return new Person(applicationNo,firstName, lastName);
+
+            return application;
         };
     }
 
     @Bean
-    public JdbcBatchItemWriter<Person> writer(DataSource dataSource) {
-        return new JdbcBatchItemWriterBuilder<Person>()
+    public JdbcBatchItemWriter<Application> writer(DataSource dataSource) {
+        return new JdbcBatchItemWriterBuilder<Application>()
                 .itemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>())
-                .sql("INSERT INTO people (application_no,first_name, last_name) VALUES (:applicationNo, :firstName, :lastName)")
+                .sql("INSERT INTO application (application_no) VALUES (:applicationNo)")
                 .dataSource(dataSource)
                 .build();
     }
@@ -130,7 +127,7 @@ public class BatchConfiguration {
             public void beforeJob(JobExecution jobExecution) {
                 JobParameters key = jobExecution.getJobParameters();
                 key.getLong("batch-key");
-                bodyReader.setResult(key.getLong("batch-key"),objectResult);
+                appReader.setResult(key.getLong("batch-key"),objectResult);
                 objectResult.clear();
                 log.info("Job : " + jobExecution.getJobConfigurationName() + " started!");
             }
@@ -139,12 +136,8 @@ public class BatchConfiguration {
             public void afterJob(JobExecution jobExecution) {
                 if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
                     log.info("!!! JOB FINISHED! Time to verify the results");
-                    int size = jdbcTemplate.query("SELECT application_no,first_name, last_name FROM people",
-                            (rs, row) -> new Person(
-                                    rs.getString(1),
-                                    rs.getString(2),
-                                    rs.getString(3))
-                    ).size();
+                    int size = jdbcTemplate.query("SELECT application_no FROM application",
+                            (rs, row) -> new Application()).size();
                     log.info("Found " + size + " items in the database.");
 
                     Long batchKey = jobExecution.getJobParameters().getLong("batch-key");
