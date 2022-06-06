@@ -1,6 +1,7 @@
 package com.aycap.kbb.batchdemo;
 
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,10 +50,11 @@ class BatchDemoTest {
         expected.put("error_count",0);
         expected.put("errors",mockList);
 
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<Object> entity = new HttpEntity<>(new ClassPathResource("mock.json"),headers);
-        assertEquals(expected.,this.testTemplate.postForEntity(url(),entity,String.class).getBody());
+        assertEquals(new JSONObject(expected).toString(),this.testTemplate.postForEntity(url(),entity,String.class).getBody());
     }
 
 
