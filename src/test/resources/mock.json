@@ -45,7 +45,10 @@
     "package_code": "PACK0001",
     "subpackage_code": "ACE_PA_@AYGBA-Y165SD[11402]A",
     "base_credit_card": "1111222233334444",
-    "payer_consent_version": "0521"
+    "payer_consent_version": "0521",
+    "payer_consent_flags": {},
+    "insured_persons" : [],
+    "payment_detail" : []
   },
   {
     "application_no": "SMKCL13458895",
@@ -93,6 +96,9 @@
     "package_code": "PACK0001",
     "subpackage_code": "ACE_PA_@AYGBA-Y165SD[11402]A",
     "base_credit_card": "1111222233334444",
-    "payer_consent_version": "0521"
+    "payer_consent_version": "0521",
+    "payer_consent_flags": {},
+    "insured_persons" : [],
+    "payment_detail" : []
   }
 ]
