@@ -127,7 +127,41 @@ public class BatchConfiguration {
                         "payer_name_en," +
                         "payer_lastname," +
                         "payer_lastname_en," +
-                        "payer_birth_date) " +
+                        "payer_birth_date," +
+                        "payer_gender," +
+                        "payer_marriage_status," +
+                        "payer_type," +
+                        "payer_card_type," +
+                        "payer_card_id," +
+                        "payer_occupation," +
+                        "payer_moobarn," +
+                        "payer_room_number," +
+                        "payer_home_number," +
+                        "payer_moo," +
+                        "payer_soi," +
+                        "payer_road," +
+                        "payer_tumbol," +
+                        "payer_amphur," +
+                        "payer_province," +
+                        "payer_post_code," +
+                        "payer_telephone_extension," +
+                        "payer_telephone," +
+                        "payer_fax," +
+                        "mode_of_payment," +
+                        "payment_channel," +
+                        "payment_sub_channel," +
+                        "channel_flag," +
+                        "insurer_code," +
+                        "insurer_type," +
+                        "policy_year," +
+                        "selling_date," +
+                        "campaign_code," +
+                        "package_code," +
+                        "subpackage_code," +
+                        "base_credit_card," +
+                        "payer_consent_flags," +
+                        "insured_persons," +
+                        "payment_detail) " +
                         "VALUES " +
                         "(:applicationNo," +
                         ":productCode," +
@@ -142,7 +176,41 @@ public class BatchConfiguration {
                         ":payerNameEn," +
                         ":payerLastname," +
                         ":payerLastnameEn," +
-                        ":payerBirthDate) " +
+                        ":payerBirthDate," +
+                        ":payerGender," +
+                        ":payerMarriageStatus," +
+                        ":payerType," +
+                        ":payerCardType," +
+                        ":payerCardId," +
+                        ":payerOccupation," +
+                        ":payerMoobarn," +
+                        ":payerRoomNumber," +
+                        ":payerHomeNumber," +
+                        ":payerMoo," +
+                        ":payerSoi," +
+                        ":payerRoad," +
+                        ":payerTumbol," +
+                        ":payerAmphur," +
+                        ":payerProvince," +
+                        ":payerPostCode," +
+                        ":payerTelephoneExtension," +
+                        ":payerTelephone," +
+                        ":payerFax," +
+                        ":modeOfPayment," +
+                        ":paymentChannel," +
+                        ":paymentSubChannel," +
+                        ":channelFlag," +
+                        ":insurerCode," +
+                        ":insurerType," +
+                        ":policyYear," +
+                        ":sellingDate," +
+                        ":campaignCode," +
+                        ":packageCode," +
+                        ":subpackageCode," +
+                        ":baseCreditCard," +
+                        "1," +
+                        "1," +
+                        "1) " +
                         "")
                 .dataSource(dataSource)
                 .build();
