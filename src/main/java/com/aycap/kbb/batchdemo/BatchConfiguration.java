@@ -97,10 +97,12 @@ public class BatchConfiguration {
             if(!violations.isEmpty()) {
                 HashMap<String, String> resultObject = new HashMap<>();
                 for (ConstraintViolation<Application> violation : violations) {
-                    log.info("violations size : "+violations.size());
-                    resultObject.put("application_no", application.getApplicationNo());
-                    resultObject.put("reason", violation.getMessageTemplate());
-                    objectResult.add(resultObject);
+                        resultObject.put("application_no", application.getApplicationNo());
+                        resultObject.put("reason", violation.getMessageTemplate());
+                        objectResult.add(resultObject);
+                    if (violations.size() >= 2) {
+                        break;
+                    }
                 }
                 return null;
             }
