@@ -5,15 +5,18 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.Data;
 import lombok.ToString;
+import org.springframework.validation.annotation.Validated;
 
 import javax.validation.Valid;
 import javax.validation.constraints.*;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @ToString
+@Validated
 public class Application {
     @NotEmpty(message = "[last_name] must not be empty")
     @Size(max = 20, message = "[application_no] must be no more than 20 characters")
@@ -208,9 +211,9 @@ public class Application {
     String payerConsentVersion;
 
     @NotNull(message = "[payer_consent_flags] must not be null")
+    @Valid
     ConsentFlag payerConsentFlags;
 
-    //region waiting for implement
     @AssertTrue(message = "[insured_persons] must not be null")
     private boolean isProductCodePa(){
         if(productCode.equals("PA")){
@@ -218,10 +221,8 @@ public class Application {
         }
         return true;
     }
-    //todo implement insuredPerson Model
-    ArrayList<Object> insuredPersons;
+    List<@Valid InsuredPerson> insuredPersons;
 
-    //endregion
 
     @NotNull(message = "[payment_detail] must not be null")
     Object paymentDetail;

@@ -43,7 +43,7 @@ public class BatchConfiguration {
     AppReader appReader;
 
     @Bean
-    public Job importUserJob(
+    public Job  importUserJob(
             JobBuilderFactory jobBuilderFactory,
             JobExecutionListener jobExecutionListener,
             Step stepOne
@@ -97,6 +97,7 @@ public class BatchConfiguration {
             if(!violations.isEmpty()) {
                 HashMap<String, String> resultObject = new HashMap<>();
                 for (ConstraintViolation<Application> violation : violations) {
+                    log.info("violations size : "+violations.size());
                     resultObject.put("application_no", application.getApplicationNo());
                     resultObject.put("reason", violation.getMessageTemplate());
                     objectResult.add(resultObject);
@@ -242,21 +243,5 @@ public class BatchConfiguration {
                 }
             }
         };
-    }
-
-    /**
-     * Depreciated
-     */
-    public FlatFileItemReader<Application> reader() {
-        BeanWrapperFieldSetMapper<Application> mapper = new BeanWrapperFieldSetMapper<>();
-        mapper.setTargetType(Application.class);
-        String resourcePath = "sample-data.csv";//"sample-data.large.csv"
-        return new FlatFileItemReaderBuilder<Application>()
-                .name("personItemReader")
-                .resource(new ClassPathResource(resourcePath))
-                .delimited()
-                .names("firstName", "lastName")
-                .fieldSetMapper(mapper)
-                .build();
     }
 }
